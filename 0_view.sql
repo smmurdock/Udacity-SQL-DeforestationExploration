@@ -1,5 +1,7 @@
 -- Create a view called "forestation"
 -- Joins forest_area, land_area, and regions tables
+DROP VIEW IF EXISTS forestation;
+
 CREATE VIEW forestation
 AS SELECT
   fa.country_code,
@@ -17,3 +19,6 @@ ON fa.country_code = la.country_code
 AND fa.year = la.year
 JOIN regions r
 ON la.country_code = r.country_code;
+
+SELECT * FROM forestation
+LIMIT 10;
