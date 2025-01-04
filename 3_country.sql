@@ -77,7 +77,6 @@ WITH us_forest_percentage AS (
 )
 SELECT COUNT(*) AS countries_higher_than_us
 FROM forestation
-WHERE 
-    year = 2016 
-    AND perc_land_is_forest > (SELECT perc_land_is_forest 
-                               FROM us_forest_percentage);
+WHERE year = 2016 
+AND perc_land_is_forest > (SELECT perc_land_is_forest 
+                          FROM us_forest_percentage);
