@@ -12,7 +12,7 @@ GROUP BY
     country_code, 
     country_name
 ORDER BY forest_area_change ASC -- ASC because it starts from negative values
-LIMIT 5;
+LIMIT 6;
 
 /* b. Which 5 countries saw the largest percent decrease in forest area from 1990 to 2016? What was the percent change to 2 decimal places for each? */
 -- Find the countries with the largest percent decrease in forest area from 1990 to 2016 and round to 2 decimals
@@ -28,44 +28,34 @@ GROUP BY
     country_name
 HAVING SUM(CASE WHEN year = 1990 THEN forest_area_sqkm ELSE 0 END) > 0 -- Ensure we don't divide by zero
 ORDER BY percent_change ASC
-LIMIT 5;
+LIMIT 6;
 
 /* c. If countries were grouped by percent forestation in quartiles, which group had the most countries in it in 2016? */
 -- Create quartiles of perc_land_is_forest and determine which quartile has the highest number of countries
-WITH quartiles AS (
-    SELECT 
-        country_code,
-        country_name,
-        perc_land_is_forest,
-        NTILE(4) OVER (ORDER BY perc_land_is_forest) AS quartile
-    FROM forestation
-    WHERE year = 2016
-)
 SELECT 
-    quartile,
-    COUNT(*) AS country_count
-FROM quartiles
-GROUP BY quartile
-ORDER BY country_count DESC
-LIMIT 1;
+    DISTINCT(quartiles), 
+    COUNT(country_name) OVER (PARTITION BY quartiles) AS countries
+    FROM (SELECT country_name,
+          CASE WHEN perc_land_is_forest <= 25 THEN '0-25%'
+              WHEN perc_land_is_forest <= 75 AND perc_land_is_forest > 50 THEN '50-75%'
+              WHEN perc_land_is_forest <= 50 AND perc_land_is_forest > 25 THEN '25-50%'
+              ELSE '75-100%'
+          END AS quartiles 
+FROM forestation
+WHERE (perc_land_is_forest IS NOT NULL AND year = 2016) 
+AND country_name <> 'World') quart; 
 
 /* d. List all of the countries that were in the 4th quartile (percent forest > 75%) in 2016. */ 
 -- List all countries in the 4th quartile (>75%) in 2016
-WITH quartiles AS (
-    SELECT 
-        country_code,
-        country_name,
-        perc_land_is_forest,
-        NTILE(4) OVER (ORDER BY perc_land_is_forest) AS quartile
-    FROM forestation
-    WHERE year = 2016
-)
 SELECT 
-    country_code,
-    country_name,
+    country_name, 
+    region, 
     perc_land_is_forest
-FROM quartiles
-WHERE quartile = 4;
+FROM forestation
+WHERE year = 2016
+AND country_name <> 'World'
+AND perc_land_is_forest > 75 
+ORDER BY 3 DESC;
 
 /* e. How many countries had a percent forestation higher than the United States in 2016? */
 -- Find number of countries with higher percent of forest than the United States in 2016
