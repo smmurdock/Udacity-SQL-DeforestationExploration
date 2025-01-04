@@ -1,7 +1,7 @@
 /* a. What was the percent forest of the entire world in 2016? Which region had the HIGHEST percent forest in 2016, and which had the LOWEST, to 2 decimal places? */
 -- Find the percent forest of the entire world in 2016
 SELECT
-    SUM(forest_area_sqkm) / SUM(total_area_sqkm) * 100 AS forest_area_world
+    ROUND(CAST(SUM(forest_area_sqkm) / SUM(total_area_sqkm) * 100 AS NUMERIC), 2) AS forest_area_world
 FROM forestation
 WHERE year = 2016;
 
@@ -56,9 +56,6 @@ SELECT
     region,
     SUM(CASE WHEN year = 1990 THEN forest_area_sqkm ELSE 0 END) AS forest_area_1990,
     SUM(CASE WHEN year = 2016 THEN forest_area_sqkm ELSE 0 END) AS forest_area_2016
-FROM 
-    forestation
-GROUP BY 
-    region
-HAVING 
-    SUM(CASE WHEN year = 2016 THEN forest_area_sqkm ELSE 0 END) < SUM(CASE WHEN year = 1990 THEN forest_area_sqkm ELSE 0 END);
+FROM forestation
+GROUP BY region
+HAVING SUM(CASE WHEN year = 2016 THEN forest_area_sqkm ELSE 0 END) < SUM(CASE WHEN year = 1990 THEN forest_area_sqkm ELSE 0 END);
